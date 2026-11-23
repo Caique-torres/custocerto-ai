@@ -1,0 +1,30 @@
+{
+  "cliente": {
+    "nome": "Cliente Demonstrativo",
+    "idade": 30,
+    "renda_mensal": 4500.00,
+    "tipo_renda": "Fixa",
+    "perfil_financeiro": "Moderado"
+  },
+  "objetivos": {
+    "objetivo_principal": "Organizar as finanças pessoais",
+    "meta_economia_mensal": 500.00,
+    "reserva_emergencia": 10000.00,
+    "prazo_meta_meses": 12
+  },
+  "preferencias": {
+    "prioridade": "Reduzir despesas mensais",
+    "categorias_atencao": [
+      "Alimentacao",
+      "Transporte",
+      "Lazer"
+    ],
+    "receber_alertas": true,
+    "receber_recomendacoes": true
+  },
+  "configuracoes": {
+    "moeda": "BRL",
+    "periodo_analise": "Mensal",
+    "dia_fechamento": 30
+  }
+}
