@@ -8,11 +8,12 @@ A aplicação utiliza processamento de dados financeiros, cálculos automatizado
 ##  Estrutura do Projeto
 
 ```text
-src/
-├── app.py              # Aplicação principal com Streamlit
-├── agente.py           # Lógica e comportamento do agente
-├── config.py           # Configurações e API Gemini
-└── requirements.txt    # Dependências do projeto
+📁 src/
+│   ├── app.py          # Aplicação principal com interface Streamlit
+│   ├── agente.py       # Lógica e comportamento do agente de IA
+│   ├── analise.py      # Análise financeira e geração de indicadores
+│   ├── simulador.py    # Simulação de metas e planejamento financeiro
+│   └── memoria.py      # Armazenamento e gerenciamento dos dados financeiros
 ```
 
 ##  Tecnologias Utilizadas
