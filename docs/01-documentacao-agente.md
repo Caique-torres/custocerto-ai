@@ -1,5 +1,4 @@
-
-# 🤖 Documentação do Agente — CustoCerto AI
+#  Documentação do Agente — CustoCerto AI
 
 ## Caso de Uso
 
