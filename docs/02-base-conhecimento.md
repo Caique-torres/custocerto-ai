@@ -1,5 +1,4 @@
-
-# 📊 Base de Conhecimento — CustoCerto AI
+#  Base de Conhecimento — CustoCerto AI
 
 ## Dados Utilizados
 
