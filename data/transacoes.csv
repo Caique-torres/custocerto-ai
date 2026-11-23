@@ -1,11 +1,21 @@
-data,descricao,categoria,valor,tipo
-2025-10-01,Salário,receita,5000.00,entrada
-2025-10-02,Aluguel,moradia,1200.00,saida
-2025-10-03,Supermercado,alimentacao,450.00,saida
-2025-10-05,Netflix,lazer,55.90,saida
-2025-10-07,Farmácia,saude,89.00,saida
-2025-10-10,Restaurante,alimentacao,120.00,saida
-2025-10-12,Uber,transporte,45.00,saida
-2025-10-15,Conta de Luz,moradia,180.00,saida
-2025-10-20,Academia,saude,99.00,saida
-2025-10-25,Combustível,transporte,250.00,saida
+data,descricao,categoria,tipo,valor
+2026-11-01,Salario,Renda,receita,4500.00
+2026-11-02,Aluguel,Moradia,despesa,1200.00
+2026-11-03,Supermercado,Alimentacao,despesa,350.00
+2026-11-04,Conta de luz,Contas_Domesticas,despesa,150.00
+2026-11-05,Combustivel,Transporte,despesa,180.00
+2026-11-06,Internet,Contas_Domesticas,despesa,100.00
+2026-11-07,Restaurante,Alimentacao,despesa,120.00
+2026-11-08,Academia,Saude,despesa,100.00
+2026-11-09,Cinema,Lazer,despesa,60.00
+2026-11-10,Curso online,Educacao,despesa,150.00
+2026-11-11,Supermercado,Alimentacao,despesa,280.00
+2026-11-12,Agua,Contas_Domesticas,despesa,80.00
+2026-11-13,Transporte por aplicativo,Transporte,despesa,90.00
+2026-11-14,Consulta medica,Saude,despesa,150.00
+2026-11-15,Lanche,Lazer,despesa,45.00
+2026-11-16,Compra pessoal,Outros,despesa,120.00
+2026-11-17,Supermercado,Alimentacao,despesa,250.00
+2026-11-18,Manutencao residencial,Moradia,despesa,200.00
+2026-11-19,Combustivel,Transporte,despesa,100.00
+2026-11-20,Material de estudo,Educacao,despesa,50.00
