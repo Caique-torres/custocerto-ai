@@ -327,7 +327,4 @@ Suas previsões e recomendações não representam aconselhamento financeiro pro
 
 Os dados utilizados para demonstração são fictícios.
 
----
-
-⭐ Se este projeto despertou seu interesse, acompanhe sua evolução pelo GitHub!
 
