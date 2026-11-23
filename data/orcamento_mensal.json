@@ -1,0 +1,28 @@
+{
+  "orcamento": {
+    "mes": "2026-11",
+    "moeda": "BRL",
+    "renda_prevista": 4500.00,
+    "meta_economia": 500.00
+  },
+  "limites_por_categoria": {
+    "Moradia": 1500.00,
+    "Alimentacao": 700.00,
+    "Transporte": 350.00,
+    "Saude": 250.00,
+    "Educacao": 200.00,
+    "Lazer": 200.00,
+    "Contas_Domesticas": 300.00,
+    "Outros": 300.00
+  },
+  "alertas": {
+    "percentual_atencao": 80,
+    "avisar_orcamento_excedido": true,
+    "avisar_categoria_proxima_limite": true
+  },
+  "regras": {
+    "periodicidade": "Mensal",
+    "permitir_revisao_orcamento": true,
+    "considerar_despesas_recorrentes": true
+  }
+}
