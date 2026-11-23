@@ -182,7 +182,7 @@ melhor seus custos mensais.
 
 ---
 
-# 💬 7. Aplicação Funcional
+#  7. Aplicação Funcional
 
 O projeto será desenvolvido utilizando Google Colab, Python e Gradio.
 
