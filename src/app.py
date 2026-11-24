@@ -1,92 +1,151 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import sys
-from pathlib import Path
+import os
 
 # ==========================================
-# CONFIGURAÇÃO DOS CAMINHOS
-# ==========================================
-
-BASE_DIR = Path(__file__).resolve().parent
-
-if str(BASE_DIR) not in sys.path:
-    sys.path.insert(0, str(BASE_DIR))
-
-# ==========================================
-# IMPORTAÇÃO DOS MÓDULOS SRC
-# ==========================================
-
-try:
-    from memoria import carregar_dados, adicionar_transacao
-    from analise import resumo_financeiro, gastos_por_categoria
-    from simulador import simular_meta, simular_reducao_despesas
-    from agente import responder
-
-except ImportError as erro:
-    st.error(f"Erro ao carregar os módulos: {erro}")
-    st.stop()
-
-# ==========================================
-# CONFIGURAÇÃO STREAMLIT
+# CONFIGURAÇÃO
 # ==========================================
 
 st.set_page_config(
     page_title="CustoCerto AI",
     page_icon="💰",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
-
-# ==========================================
-# ESTILO VISUAL
-# ==========================================
 
 st.markdown("""
 <style>
 .stApp {
-    background-color: #F5F7FB;
+    background: #F4F7FB;
 }
-
 h1, h2, h3 {
     color: #17324D;
 }
-
 div[data-testid="stMetric"] {
-    background-color: white;
-    padding: 18px;
+    background: white;
+    padding: 15px;
     border-radius: 12px;
-    border: 1px solid #E5EAF0;
-}
-
-section[data-testid="stSidebar"] {
-    background-color: #102D46;
-}
-
-section[data-testid="stSidebar"] * {
-    color: white;
+    border: 1px solid #E2E8F0;
 }
 </style>
 """, unsafe_allow_html=True)
+
+# ==========================================
+# BANCO DE DADOS DA SESSÃO
+# ==========================================
+
+COLUNAS = [
+    "data", "descricao", "categoria", "tipo", "valor"
+]
+
+if "transacoes" not in st.session_state:
+
+    dados = [
+        ["2026-11-01", "Salário", "Renda", "Receita", 4500],
+        ["2026-11-02", "Aluguel", "Moradia", "Despesa", 1200],
+        ["2026-11-03", "Supermercado", "Alimentação", "Despesa", 350],
+        ["2026-11-04", "Conta de luz", "Contas domésticas", "Despesa", 150],
+        ["2026-11-05", "Combustível", "Transporte", "Despesa", 180],
+        ["2026-11-06", "Internet", "Contas domésticas", "Despesa", 100],
+        ["2026-11-07", "Restaurante", "Alimentação", "Despesa", 120],
+        ["2026-11-08", "Academia", "Saúde", "Despesa", 100],
+        ["2026-11-09", "Cinema", "Lazer", "Despesa", 60],
+        ["2026-11-10", "Curso online", "Educação", "Despesa", 150],
+    ]
+
+    st.session_state.transacoes = pd.DataFrame(
+        dados, columns=COLUNAS
+    )
+
+df = st.session_state.transacoes.copy()
+
+# ==========================================
+# FUNÇÕES FINANCEIRAS
+# ==========================================
+
+def resumo_financeiro(df):
+
+    receitas = df.loc[
+        df["tipo"] == "Receita", "valor"
+    ].sum()
+
+    despesas = df.loc[
+        df["tipo"] == "Despesa", "valor"
+    ].sum()
+
+    return {
+        "receitas": receitas,
+        "despesas": despesas,
+        "saldo": receitas - despesas
+    }
+
+
+def gastos_por_categoria(df):
+
+    despesas = df[
+        df["tipo"] == "Despesa"
+    ]
+
+    return despesas.groupby(
+        "categoria"
+    )["valor"].sum().sort_values(
+        ascending=False
+    )
+
+
+def responder(pergunta, df):
+
+    pergunta = pergunta.lower()
+
+    resumo = resumo_financeiro(df)
+    gastos = gastos_por_categoria(df)
+
+    if "saldo" in pergunta:
+        return f"Seu saldo registrado é R$ {resumo['saldo']:,.2f}."
+
+    if "receita" in pergunta or "renda" in pergunta:
+        return f"Suas receitas são R$ {resumo['receitas']:,.2f}."
+
+    if "despesa" in pergunta or "gastei" in pergunta:
+        return f"Suas despesas são R$ {resumo['despesas']:,.2f}."
+
+    if "alimentação" in pergunta or "alimentacao" in pergunta:
+        return f"Você gastou R$ {gastos.get('Alimentação', 0):,.2f} com alimentação."
+
+    if "transporte" in pergunta:
+        return f"Você gastou R$ {gastos.get('Transporte', 0):,.2f} com transporte."
+
+    if "moradia" in pergunta:
+        return f"Você gastou R$ {gastos.get('Moradia', 0):,.2f} com moradia."
+
+    if "maior" in pergunta:
+        if gastos.empty:
+            return "Não existem despesas cadastradas."
+        return f"Sua maior categoria é {gastos.idxmax()}, com R$ {gastos.max():,.2f}."
+
+    if "econom" in pergunta:
+        return f"Seu saldo atual é R$ {resumo['saldo']:,.2f}. Analise suas categorias para encontrar oportunidades de economia."
+
+    return (
+        "Sou o CustoCerto AI! Posso ajudar com saldo, "
+        "receitas, despesas, alimentação, transporte, "
+        "moradia e metas de economia."
+    )
+
 
 # ==========================================
 # CABEÇALHO
 # ==========================================
 
 st.title("💰 CustoCerto AI")
-
-st.caption(
-    "Inteligência financeira ao seu alcance"
-)
-
-st.divider()
+st.caption("Seu assistente inteligente de organização financeira")
 
 # ==========================================
 # MENU
 # ==========================================
 
 pagina = st.sidebar.radio(
-    "📌 MENU PRINCIPAL",
+    "MENU PRINCIPAL",
     [
         "Dashboard",
         "Lançamentos",
@@ -96,22 +155,7 @@ pagina = st.sidebar.radio(
     ]
 )
 
-st.sidebar.divider()
-st.sidebar.caption("CustoCerto AI © 2026")
-st.sidebar.caption("Controle financeiro inteligente")
-
-# ==========================================
-# CARREGAMENTO DOS DADOS
-# ==========================================
-
-try:
-    df = carregar_dados()
-
-    resumo = resumo_financeiro(df)
-
-except Exception as erro:
-    st.error(f"Erro ao carregar dados financeiros: {erro}")
-    st.stop()
+resumo = resumo_financeiro(df)
 
 # ==========================================
 # DASHBOARD
@@ -123,73 +167,41 @@ if pagina == "Dashboard":
 
     c1, c2, c3 = st.columns(3)
 
-    c1.metric(
-        "💵 Receitas",
-        f"R$ {resumo['receitas']:,.2f}"
-    )
-
-    c2.metric(
-        "💸 Despesas",
-        f"R$ {resumo['despesas']:,.2f}"
-    )
-
-    c3.metric(
-        "💰 Saldo disponível",
-        f"R$ {resumo['saldo']:,.2f}"
-    )
-
-    st.divider()
+    c1.metric("Receitas", f"R$ {resumo['receitas']:,.2f}")
+    c2.metric("Despesas", f"R$ {resumo['despesas']:,.2f}")
+    c3.metric("Saldo", f"R$ {resumo['saldo']:,.2f}")
 
     gastos = gastos_por_categoria(df)
 
     if not gastos.empty:
 
-        st.subheader("Distribuição das despesas")
+        col1, col2 = st.columns(2)
 
-        fig = px.pie(
-            values=gastos.values,
-            names=gastos.index,
-            hole=0.5,
-            title="Gastos por categoria",
-            color_discrete_sequence=px.colors.qualitative.Set2
-        )
+        with col1:
+            st.subheader("Distribuição dos gastos")
 
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
+            fig = px.pie(
+                values=gastos.values,
+                names=gastos.index,
+                hole=0.5
+            )
 
-        st.subheader("Comparativo de despesas")
+            st.plotly_chart(fig, use_container_width=True)
 
-        grafico = px.bar(
-            x=gastos.index,
-            y=gastos.values,
-            labels={
-                "x": "Categoria",
-                "y": "Valor em R$"
-            },
-            color=gastos.values,
-            color_continuous_scale="Blues"
-        )
+        with col2:
+            st.subheader("Gastos por categoria")
 
-        st.plotly_chart(
-            grafico,
-            use_container_width=True
-        )
+            fig = px.bar(
+                x=gastos.index,
+                y=gastos.values,
+                labels={"x": "Categoria", "y": "Valor (R$)"}
+            )
 
-    else:
-        st.info("Ainda não existem despesas cadastradas.")
+            st.plotly_chart(fig, use_container_width=True)
 
-    st.subheader("Últimas movimentações")
+    st.subheader("Movimentações financeiras")
 
-    st.dataframe(
-        df,
-        use_container_width=True,
-        hide_index=True
-    )
-
-    if st.button("🔄 Atualizar dashboard"):
-        st.rerun()
+    st.dataframe(df, use_container_width=True, hide_index=True)
 
 # ==========================================
 # LANÇAMENTOS
@@ -199,83 +211,64 @@ elif pagina == "Lançamentos":
 
     st.header("💳 Novo lançamento")
 
-    st.write(
-        "Registre suas receitas e despesas financeiras."
-    )
+    with st.form("novo_lancamento"):
 
-    with st.form("form_lancamento"):
+        data = st.date_input("Data")
 
-        data = st.date_input(
-            "Data",
-            value=pd.Timestamp.today().date()
-        )
-
-        descricao = st.text_input(
-            "Descrição",
-            placeholder="Ex: Supermercado"
-        )
+        descricao = st.text_input("Descrição")
 
         tipo = st.selectbox(
-            "Tipo de movimentação",
+            "Tipo",
             ["Receita", "Despesa"]
         )
 
-        categorias = [
-            "Moradia",
-            "Alimentação",
-            "Transporte",
-            "Saúde",
-            "Educação",
-            "Lazer",
-            "Contas domésticas",
-            "Outros"
-        ]
-
         categoria = st.selectbox(
             "Categoria",
-            categorias
+            [
+                "Renda",
+                "Moradia",
+                "Alimentação",
+                "Transporte",
+                "Saúde",
+                "Educação",
+                "Lazer",
+                "Contas domésticas",
+                "Outros"
+            ]
         )
 
         valor = st.number_input(
             "Valor (R$)",
             min_value=0.01,
-            value=100.00,
-            step=10.00
+            value=100.00
         )
 
-        enviar = st.form_submit_button(
-            "💾 Salvar lançamento",
-            use_container_width=True
+        salvar = st.form_submit_button(
+            "Salvar lançamento"
         )
 
-        if enviar:
+        if salvar:
 
             if not descricao.strip():
                 st.error("Informe a descrição.")
 
             else:
 
-                try:
+                novo = pd.DataFrame([{
+                    "data": str(data),
+                    "descricao": descricao,
+                    "categoria": categoria,
+                    "tipo": tipo,
+                    "valor": valor
+                }])
 
-                    adicionar_transacao(
-                        data,
-                        descricao.strip(),
-                        categoria,
-                        tipo,
-                        valor
-                    )
+                st.session_state.transacoes = pd.concat(
+                    [st.session_state.transacoes, novo],
+                    ignore_index=True
+                )
 
-                    st.success(
-                        "✅ Lançamento salvo com sucesso!"
-                    )
-
-                    st.rerun()
-
-                except Exception as erro:
-
-                    st.error(
-                        f"Não foi possível salvar: {erro}"
-                    )
+                st.success("Lançamento cadastrado!")
+                st.rerun()
 
 # ==========================================
 # ANÁLISE FINANCEIRA
@@ -287,46 +280,30 @@ elif pagina == "Análise Financeira":
 
     gastos = gastos_por_categoria(df)
 
-    if not gastos.empty:
+    percentual = (
+        resumo["despesas"] / resumo["receitas"] * 100
+        if resumo["receitas"] > 0 else 0
+    )
 
-        st.subheader("Gastos por categoria")
+    st.metric(
+        "Percentual da renda utilizado",
+        f"{percentual:.1f}%"
+    )
+
+    if not gastos.empty:
 
         fig = px.bar(
             x=gastos.index,
             y=gastos.values,
             text_auto=".2f",
-            labels={
-                "x": "Categoria",
-                "y": "Valor (R$)"
-            },
-            color=gastos.values,
-            color_continuous_scale="Blues"
+            labels={"x": "Categoria", "y": "Valor (R$)"}
         )
 
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
-
-        st.subheader("Resumo das categorias")
+        st.plotly_chart(fig, use_container_width=True)
 
         st.dataframe(
             gastos.rename("Total gasto"),
             use_container_width=True
-        )
-
-        maior_categoria = gastos.idxmax()
-
-        st.info(
-            f"Sua maior categoria de despesas é "
-            f"{maior_categoria}, com "
-            f"R$ {gastos.max():,.2f}."
-        )
-
-    else:
-
-        st.info(
-            "Cadastre despesas para visualizar a análise."
         )
 
 # ==========================================
@@ -337,83 +314,53 @@ elif pagina == "Simulador":
 
     st.header("🎯 Simulador de Economia")
 
-    st.subheader("Planejamento de metas")
-
     meta = st.number_input(
-        "Meta financeira (R$)",
+        "Sua meta financeira (R$)",
         min_value=1.0,
-        value=5000.0,
-        step=100.0
+        value=5000.0
     )
 
     meses = st.number_input(
         "Prazo em meses",
         min_value=1,
-        value=12,
-        step=1
+        value=12
     )
 
-    if st.button("💰 Simular meta"):
+    if st.button("Simular meta"):
 
-        try:
+        falta = max(0, meta - resumo["saldo"])
 
-            resultado = simular_meta(
-                meta,
-                resumo["saldo"],
-                meses
-            )
+        mensal = falta / meses
 
-            st.metric(
-                "Economia mensal necessária",
-                f"R$ {resultado['economia_mensal']:,.2f}"
-            )
+        st.metric(
+            "Economia mensal necessária",
+            f"R$ {mensal:,.2f}"
+        )
 
-            st.write(
-                f"Valor restante: "
-                f"R$ {resultado['valor_restante']:,.2f}"
-            )
-
-        except Exception as erro:
-
-            st.error(
-                f"Erro na simulação: {erro}"
-            )
+        st.write(
+            f"Valor restante: R$ {falta:,.2f}"
+        )
 
     st.divider()
 
-    st.subheader("Simulação de redução de despesas")
-
     percentual = st.slider(
-        "Redução desejada (%)",
-        min_value=0,
-        max_value=100,
-        value=10
+        "Redução das despesas (%)",
+        0, 100, 10
     )
 
-    if st.button("📉 Simular redução"):
+    if st.button("Simular redução"):
 
-        try:
+        economia = resumo["despesas"] * percentual / 100
 
-            resultado = simular_reducao_despesas(
-                resumo["despesas"],
-                percentual
-            )
+        st.metric(
+            "Economia estimada",
+            f"R$ {economia:,.2f}"
+        )
 
-            st.metric(
-                "Economia estimada",
-                f"R$ {resultado['economia']:,.2f}"
-            )
-
-            st.metric(
-                "Novas despesas",
-                f"R$ {resultado['novas_despesas']:,.2f}"
-            )
-
-        except Exception as erro:
-
-            st.error(
-                f"Erro na simulação: {erro}"
-            )
+        st.metric(
+            "Novas despesas",
+            f"R$ {resumo['despesas'] - economia:,.2f}"
+        )
 
 # ==========================================
 # ASSISTENTE AI
@@ -422,11 +369,6 @@ elif pagina == "Simulador":
 elif pagina == "Assistente AI":
 
     st.header("🤖 Assistente Financeiro")
-
-    st.write(
-        "Pergunte sobre suas receitas, despesas, "
-        "orçamento e metas financeiras."
-    )
 
     if "historico" not in st.session_state:
         st.session_state.historico = []
@@ -447,34 +389,19 @@ elif pagina == "Assistente AI":
             "content": pergunta
         })
 
-        try:
-
-            # Atualizar dados antes da resposta
-            df_atual = carregar_dados()
-
-            resposta = responder(
-                pergunta,
-                df_atual
-            )
-
-            if resposta is None:
-                resposta = "Não foi possível gerar uma resposta."
-
-        except Exception as erro:
-
-            resposta = (
-                f"Não consegui processar sua pergunta: {erro}"
-            )
+        resposta = responder(
+            pergunta,
+            df
+        )
 
         st.session_state.historico.append({
             "role": "assistant",
-            "content": str(resposta)
+            "content": resposta
         })
 
         st.rerun()
 
-    if st.button("🗑️ Limpar conversa"):
-
+    if st.button("Limpar conversa"):
         st.session_state.historico = []
         st.rerun()
 
@@ -483,7 +410,5 @@ elif pagina == "Assistente AI":
 # ==========================================
 
 st.sidebar.divider()
-
-st.sidebar.caption(
-    "Desenvolvido para organização financeira."
-)
+st.sidebar.caption("CustoCerto AI © 2026")
+st.sidebar.caption("Controle financeiro inteligente")
