@@ -22,7 +22,7 @@ h1, h2, h3 {
     color: #17324D;
 }
 div[data-testid="stMetric"] {
-    background: white;
+    background: gray;
     padding: 15px;
     border-radius: 12px;
     border: 1px solid #E2E8F0;
